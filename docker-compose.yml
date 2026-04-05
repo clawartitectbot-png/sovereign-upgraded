@@ -1,0 +1,67 @@
+version: '3.8'
+
+# SOVEREIGN — Docker Services
+# Inspired by Project NOMAD's docker-compose pattern
+#
+# Services:
+#   ollama  — Local LLM inference (port 11434)
+#   qdrant  — Vector database for RAG memory (port 6333)
+#
+# Usage:
+#   docker compose up -d          # start all services
+#   docker compose down           # stop all services
+#   docker compose logs -f ollama # follow ollama logs
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sovereign_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_MAX_LOADED_MODELS=2
+    # Pi 5 — no GPU, CPU-only inference
+    deploy:
+      resources:
+        limits:
+          memory: 12G    # Leave 4GB for OS + SOVEREIGN
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: sovereign_qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ollama_data:
+    name: sovereign_ollama_data
+  qdrant_data:
+    name: sovereign_qdrant_data
+
+networks:
+  default:
+    name: sovereign_network

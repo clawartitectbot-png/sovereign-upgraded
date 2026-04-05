@@ -1,0 +1,48 @@
+# SOVEREIGN Configuration
+# Copy this to config/sovereign.toml and edit to your preferences
+# ---------------------------------------------------------------
+
+# How often PHANTOM TICK fires (minutes)
+tick_interval_minutes = 15
+
+# Where memory files are stored
+memory_path = "~/.sovereign/memory"
+
+# Ollama API (local, from docker-compose)
+ollama_url = "http://localhost:11434"
+
+# Qdrant vector DB (local, from docker-compose)
+qdrant_url = "http://localhost:6333"
+
+# ---------------------------------------------------------------
+# Model Configuration
+# Adjust based on your Pi's RAM and which models you've pulled
+# ---------------------------------------------------------------
+
+# Fast model for quick tasks, cron jobs, basic analysis
+primary_model = "mistral-nemo:latest"
+
+# Code-specialized model for CodeAgent
+coder_model = "qwen2.5-coder:7b"
+
+# Deep reasoning model for complex decisions
+reasoning_model = "deepseek-r1:7b"
+
+# Embedding model for memory search (NOMAD-inspired: nomic-embed-text:v1.5)
+embedding_model = "nomic-embed-text:v1.5"
+
+# Hour (0-23) when Dream Engine runs nightly consolidation
+dream_hour = 2
+
+# ---------------------------------------------------------------
+# Agent Configuration
+# Set to false to disable specific agents
+# ---------------------------------------------------------------
+
+[agents]
+code_agent     = true   # Writes code, scans projects, opens PRs
+income_agent   = true   # Finds freelance work, tracks earnings
+security_agent = true   # Monitors network, checks for updates
+learning_agent = true   # Reads news, fills knowledge gaps
+finance_agent  = true   # Tracks income/expenses, budget alerts
+upgrade_agent  = true   # Benchmarks models, promotes best one

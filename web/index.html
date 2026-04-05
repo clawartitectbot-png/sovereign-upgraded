@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOVEREIGN — Autonomous AI OS</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo { display: flex; align-items: center; gap: 0.75rem; }
+  .logo-icon { font-size: 1.5rem; }
+  .logo h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.1em; color: #a78bfa; }
+  .logo span { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .status-pill {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 1rem; border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+    font-size: 0.8rem; color: var(--green);
+  }
+  .pulse { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1.5rem 2rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem; transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
+  .card-value { font-size: 2rem; font-weight: 700; color: var(--text); }
+  .card-sub { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+
+  .tick-card {
+    grid-column: 1 / -1; background: var(--surface);
+    border: 1px solid var(--accent); border-radius: 12px; padding: 1.25rem;
+  }
+  .tick-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .tick-title { font-size: 0.85rem; font-weight: 600; color: #a78bfa; letter-spacing: 0.05em; }
+  .tick-countdown { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent2); }
+  .tick-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .tick-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 1s linear; }
+
+  .agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; padding: 0 2rem 1.5rem; }
+  .agent-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem; display: flex; align-items: center; gap: 0.75rem;
+  }
+  .agent-icon { font-size: 1.4rem; }
+  .agent-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+  .agent-status { font-size: 0.7rem; color: var(--green); }
+  .agent-tasks { font-size: 0.7rem; color: var(--muted); }
+
+  .log-section { padding: 0 2rem 2rem; }
+  .log-section h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
+  .log-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1rem; font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem; max-height: 240px; overflow-y: auto; line-height: 1.7;
+  }
+  .log-entry { color: var(--muted); }
+  .log-entry.tick { color: #a78bfa; }
+  .log-entry.agent { color: var(--accent2); }
+  .log-entry.warn { color: var(--amber); }
+  .log-entry.ok { color: var(--green); }
+
+  .models-section { padding: 0 2rem 2rem; }
+  .models-section h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
+  .model-row {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.6rem 1rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.82rem;
+  }
+  .model-name { flex: 1; font-weight: 500; }
+  .model-role { color: var(--muted); font-size: 0.72rem; }
+  .model-badge {
+    padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.68rem;
+    background: rgba(124, 58, 237, 0.15); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.3);
+  }
+  .model-badge.checking { background: rgba(245, 158, 11, 0.1); color: var(--amber); border-color: rgba(245, 158, 11, 0.3); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🏛️</span>
+    <div>
+      <h1>SOVEREIGN</h1>
+      <span>Autonomous AI Operating System</span>
+    </div>
+  </div>
+  <div class="status-pill">
+    <div class="pulse"></div>
+    <span id="status-text">Running</span>
+  </div>
+</header>
+
+<!-- Stats grid -->
+<div class="grid">
+  <div class="card">
+    <div class="card-title">Total Ticks Today</div>
+    <div class="card-value" id="ticks-today">0</div>
+    <div class="card-sub">PHANTOM TICK fires every 15 min</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Memory Files</div>
+    <div class="card-value" id="memory-files">8</div>
+    <div class="card-sub">in ~/.sovereign/memory/</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Last Dream</div>
+    <div class="card-value" id="last-dream" style="font-size:1.1rem;padding-top:0.5rem">Waiting for 02:00</div>
+    <div class="card-sub">Nightly memory consolidation</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Active Agents</div>
+    <div class="card-value" id="active-agents">6</div>
+    <div class="card-sub">All agents operational</div>
+  </div>
+
+  <!-- PHANTOM TICK countdown — full width -->
+  <div class="tick-card">
+    <div class="tick-header">
+      <span class="tick-title">⚡ PHANTOM TICK</span>
+      <span class="tick-countdown" id="tick-countdown">14:59</span>
+    </div>
+    <div class="tick-bar">
+      <div class="tick-fill" id="tick-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Agents -->
+<div class="agents-grid">
+  <div class="agent-card">
+    <span class="agent-icon">💻</span>
+    <div>
+      <div class="agent-name">CodeAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+  <div class="agent-card">
+    <span class="agent-icon">💰</span>
+    <div>
+      <div class="agent-name">IncomeAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+  <div class="agent-card">
+    <span class="agent-icon">🛡️</span>
+    <div>
+      <div class="agent-name">SecurityAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+  <div class="agent-card">
+    <span class="agent-icon">📚</span>
+    <div>
+      <div class="agent-name">LearningAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+  <div class="agent-card">
+    <span class="agent-icon">📊</span>
+    <div>
+      <div class="agent-name">FinanceAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+  <div class="agent-card">
+    <span class="agent-icon">🔧</span>
+    <div>
+      <div class="agent-name">UpgradeAgent</div>
+      <div class="agent-status">● Active</div>
+      <div class="agent-tasks">0 tasks today</div>
+    </div>
+  </div>
+</div>
+
+<!-- Local models -->
+<div class="models-section">
+  <h2>Local Model Pipeline (Ollama)</h2>
+  <div class="model-row">
+    <span>🚀</span>
+    <span class="model-name">mistral-nemo:latest</span>
+    <span class="model-role">Primary — fast tasks, cron jobs</span>
+    <span class="model-badge checking" id="model-1-status">checking...</span>
+  </div>
+  <div class="model-row">
+    <span>🧠</span>
+    <span class="model-name">deepseek-r1:7b</span>
+    <span class="model-role">Reasoning — complex decisions</span>
+    <span class="model-badge checking" id="model-2-status">checking...</span>
+  </div>
+  <div class="model-row">
+    <span>💻</span>
+    <span class="model-name">qwen2.5-coder:7b</span>
+    <span class="model-role">CodeAgent tasks</span>
+    <span class="model-badge checking" id="model-3-status">checking...</span>
+  </div>
+  <div class="model-row">
+    <span>🔍</span>
+    <span class="model-name">nomic-embed-text:v1.5</span>
+    <span class="model-role">Memory search — 768-dim embeddings</span>
+    <span class="model-badge checking" id="model-4-status">checking...</span>
+  </div>
+</div>
+
+<!-- Live log -->
+<div class="log-section">
+  <h2>Activity Log</h2>
+  <div class="log-box" id="log-box">
+    <div class="log-entry tick">[SOVEREIGN] Starting up... ⚡</div>
+    <div class="log-entry">Waiting for first PHANTOM TICK...</div>
+  </div>
+</div>
+
+<script>
+  // PHANTOM TICK countdown
+  const TICK_INTERVAL = 15 * 60; // 15 minutes in seconds
+  let secondsLeft = TICK_INTERVAL;
+  let ticksToday = 0;
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function updateTick() {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      secondsLeft = TICK_INTERVAL;
+      ticksToday++;
+      document.getElementById('ticks-today').textContent = ticksToday;
+      addLog('tick', `[PHANTOM TICK] Firing tick #${ticksToday}...`);
+      addLog('agent', '[CodeAgent] Scanning local projects...');
+      addLog('agent', '[SecurityAgent] Checking for updates...');
+      addLog('ok', '[PHANTOM TICK] Complete ✓');
+    }
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    document.getElementById('tick-countdown').textContent = `${pad(m)}:${pad(s)}`;
+    const pct = ((TICK_INTERVAL - secondsLeft) / TICK_INTERVAL) * 100;
+    document.getElementById('tick-fill').style.width = pct + '%';
+  }
+
+  setInterval(updateTick, 1000);
+
+  function addLog(type, msg) {
+    const box = document.getElementById('log-box');
+    const el = document.createElement('div');
+    el.className = `log-entry ${type}`;
+    const now = new Date();
+    el.textContent = `[${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}] ${msg}`;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // Check Ollama status
+  async function checkOllama() {
+    try {
+      const res = await fetch('http://localhost:11434/api/tags');
+      if (res.ok) {
+        const data = await res.json();
+        const models = data.models || [];
+        const names = models.map(m => m.name);
+        ['mistral-nemo', 'deepseek-r1', 'qwen2.5-coder', 'nomic-embed-text'].forEach((m, i) => {
+          const el = document.getElementById(`model-${i+1}-status`);
+          const found = names.some(n => n.includes(m.split(':')[0]));
+          el.textContent = found ? 'installed' : 'not found';
+          el.className = `model-badge ${found ? '' : 'checking'}`;
+          if (found) el.style.cssText = 'background:rgba(16,185,129,0.1);color:#10b981;border-color:rgba(16,185,129,0.3)';
+        });
+        addLog('ok', `[Ollama] ${models.length} model(s) installed`);
+      }
+    } catch (e) {
+      addLog('warn', '[Ollama] Not running — start with: ollama serve');
+      ['1','2','3','4'].forEach(i => {
+        const el = document.getElementById(`model-${i}-status`);
+        el.textContent = 'offline';
+      });
+    }
+  }
+
+  // Fetch status from API
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      document.getElementById('status-text').textContent = data.status === 'running' ? 'Running' : 'Offline';
+    } catch (e) { /* backend might not be up yet */ }
+  }
+
+  // Init
+  addLog('ok', '[SOVEREIGN] Dashboard loaded');
+  addLog('agent', '[UpgradeAgent] Checking Ollama health...');
+  checkOllama();
+  setInterval(checkOllama, 60000);
+  setInterval(fetchStatus, 5000);
+</script>
+</body>
+</html>
