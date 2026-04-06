@@ -13,17 +13,22 @@ impl CodeAgent {
         // TODO: Check for failing CI runs in watched repos
         // TODO: Look for new dependency updates
 
-        // Example: check for pending git changes in projects
+        // Example: check for pending git changes in projects and auto-commit small ones
         tasks.push(AgentTask {
             agent: "CodeAgent".to_string(),
-            description: "Scan local projects for uncommitted changes".to_string(),
+            description: "Git Checkpoint: Scan and commit small changes in local projects".to_string(),
             priority: AgentPriority::Low,
             action: TaskAction::RunBash(
-                "find ~/projects -name '.git' -type d 2>/dev/null | \
+                "find ~/projects -name '.git' -type d -maxdepth 3 2>/dev/null | \
                  while read d; do \
-                   cd \"$(dirname $d)\" && \
-                   git status --short | grep -q '' && \
-                   echo \"$(dirname $d): has changes\"; \
+                   repo_dir=\"$(dirname $d)\" && \
+                   cd \"$repo_dir\" && \
+                   if [ -n \"$(git status --short)\" ]; then \
+                     echo \"Checking $repo_dir...\" && \
+                     git add . && \
+                     git commit -m \"Sovereign auto-checkpoint: $(date +'%Y-%m-%d %H:%M')\" && \
+                     git push origin $(git rev-parse --abbrev-ref HEAD) || true; \
+                   fi; \
                  done".to_string()
             ),
         });
