@@ -37,3 +37,23 @@ impl Brain for NoBrain {
         Ok("Sovereign running in No-AI mode. Please configure an API key or Ollama.".to_string())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::{SovereignConfig, AgentConfig};
+
+    #[test]
+    fn test_brain_factory_none() {
+        let mut config = SovereignConfig::default();
+        config.provider = "none".to_string();
+        let brain = BrainFactory::get_brain(&config);
+        // If this doesn't panic, the factory is working
+    }
+
+    #[test]
+    fn test_brain_factory_default() {
+        let config = SovereignConfig::default();
+        let _brain = BrainFactory::get_brain(&config);
+    }
+}
