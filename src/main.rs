@@ -15,7 +15,7 @@ use dream::DreamEngine;
 
 #[derive(Parser)]
 #[command(name = "sovereign")]
-#[command(about = "Your Personal Autonomous AI Operating System")]
+#[command(about = "Your Local Autonomous AI Personal Assistant")]
 struct Args {
     #[arg(short, long, default_value = "config/sovereign.toml")]
     config: String,
